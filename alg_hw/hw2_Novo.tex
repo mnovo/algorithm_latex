@@ -1,0 +1,158 @@
+\documentclass[]{report}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pifont}
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+
+\geometry{
+	verbose,
+	tmargin=2cm,
+	bmargin=2.5cm,
+	lmargin=3.8cm,
+	rmargin=2.5cm
+	}
+
+
+
+
+% Title Page
+\title{COT 6405 Analysis of Algorithms \\ Homework 2}
+\author{Michael Novo}
+\date{October 2, 2015}
+
+
+\begin{document}
+\maketitle
+
+
+Note: I am new to Latex. I apologize if some things are not quite right. 
+
+Discussed with: Nestor Hernandez, Gregory Reis
+
+\begin{enumerate}
+	\item  
+	
+	$ \textit{Strategy 1} $ \\ \\
+	As we try to solve the problem manually, we realize there is a trend apparent. Namely, the solution for a given $ \textit{n} $ can be gathered by altering the solutions for $ \textit{n} - 1 $ and $ \textit{n} - 2 $. Specifically, adding one to the solution of $ \textit{n} - 1 $ and adding two the solution of $ \textit{n} - 2 $, we can reach the solution for $ \textit{n} $. We notice that the specific trend corresponds to $ \textit{naive-Fibonacci}$($ \textit{n} $+1)  Hence, the recurrence should be: \\ \\
+	 $ \textit{T}(\textit{n}) =  \textit{T}(\textit{n} - 1) + \textit{T}(\textit{n} - 2)$ \\ 
+	 
+	  This is the same recurrence found upon analyzing $ \textit{naive-Fibonacci}$ in class. To provide a closed form for this solution, we know  that we can use: \\ \\
+	  
+	$ T(\textit{n}) = \frac{1}{\sqrt{5}}(\phi^{n+1}-(1-\phi)^{n+1}) $ \\ 
+	
+	where the golden ratio, $ \phi = \dfrac{1 + \sqrt{5}}{2} $  \\
+	
+	To prove that this strategy works, let us use a proof by induction. First, assume that our strategy works for $ \textit{k} $ and let's prove that it also works for $ k + 1 $. If we are assuming that the solution works for $ k $, then the solution to $ k - 1 $  and $ k - 2 $  must also have been correct by our scheme, since they are necessary to produce the correct answer for $ \textit{k} $. To arrive at the solution for $ k + 1$  we must use the solution to $ k - 1 $ , which we know is correct, and the solution to $ k $, which we have assumed is correct. Thus, our solution works for all $ n $. \\
+	
+	
+	$ \textit{Stategy 2} $ \\ \\
+	The problem stipulates that the patient can only take one or two pills on each day. Therefore, each distinct way for taking pills on a given day will consist of a permutation of ones along with twos. The permutation may also consist of solely ones or solely twos.  
+	
+	One way of enumerating all permutations is to start out with $\textit{n}$ ones as a first way of taking $\textit{n}$ pills. There is only one way to enumerate this possibility.  Next, we consider combining two of the ones in the previous way. In so doing, we have decreased the number of days the patient takes pills. We then consider the expression that tells us the number of permutations when repetition of elements is allowed, $\frac{n!}{r_{1}!r_{2}!...r_{k}!}$ where $\textit{n}$ is the number of elements and $r_{i}$ is the number of repetitions. 
+	
+	Surely, we are enumerating permutations, but how many times? It turns out that using this scheme we have a longest sequence corresponding to all ones and a shortest length sequence corresponding the maximum number of twos we can use for a given $ \textit{n} $. Taking into account both even and odd $ \textit{n} $, the maximum number of twos is $ \floor{\frac{n}{2}} $. We then realize that we are subtracting $ \textit{k} $ ones each time we combine ones into a two. We also increase the number of two repetitions by one and decrease the number of one repetitions by two.
+	
+	$$\textit{T(n)} = \sum_{k=0}^{k=\floor{\frac{n}{2}}} \frac{(n-k)!}{k!(n-2k)!}  $$	
+	
+	
+	\item $ \textit{The Dominating Set Problem} $ \\ \\ We can solve this problem using dynamic programming. To do so, we notice that the problem has overlapping subproblems. The subproblem is looking at a tree rooted at $ u $, if $ u $ is in $ S $, then its children are dominated and we add 1 to $ S $. However, if $ v $ is not in $ S $ then at least one of its children must be in $ S $ for it to be dominated. We can then break the problem down by making $ DS(v) $ be the minimum dominating set of a tree rooted at $ v $, and $ DS'(v) $ be the minimum dominating set when $ v $ does not have to be dominated. We can then write a formula to calculate the dominating set: \\
+	
+	$ DS(v)  $ =   min (1 + sum(DS'(x)) for each child(v), \\
+																					$min_{y \in child(v)}$  (1 + sum(DS'(z)) for each child(y) + sum(DS(k) for k $\neq$ y $ \in $ child(v))  )
+	
+	The first term in the minimum function signifies that we are selecting the root to be in $ S $, we can then consider each child without the requirement of it needing to be dominated since it is already dominated by the selection of $ v $. The second term is the case when we do not select $ v $ to be in $ S $, instead choosing one of its children to be.  The next $ DS(z) $  call will be looking at the solution for the grandchildren of $ v $. We then must look at each child of $ v $ with the criteria of it needing to be dominated. 
+	
+	We then write the recursion:
+	$  DS'(v) $  = min ( 1 + sum(DS'(x)) for each child(v), sum(DS(x)) for each child(v))
+	
+	From here, we note that the running time should be $ O $($b|V|$), where $ b $ is an upper bound on the tree branching factor. In the worse case, we would have $ O $($|V|^{2}$)
+	
+	
+	
+	
+	\item 
+	(a) The greedy algorithm that minimizes the number of coins returned when producing change for $ \textit{n} $ cents using quarters, dimes, nickels and pennies follows.
+	
+	\begin{algorithm}
+	\caption{Make Minimum Change for $ \textit{n} $ Cents }
+	\label{MakeChange}
+	\begin{algorithmic}[1]
+		\Procedure{Make Min Change}{} \\		
+	    q =  $n$  $mod$ Quarter.value \\
+		$n'$ = n - q*Quarter.value \\
+		d = $n'$ $mod$ Dime.value \\
+		$n''$ = $n'$ - d*Dime.value \\
+		nic = $n''$ $mod$ Nickel.value \\
+		p = $n''$ - nic*Nickel.value \\
+		return q Quarters, d Dimes, nic Nickels, p Pennies
+		\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}
+	
+	In a generalized form of the algorithm, we would first sort the coins by their respective values. We then proceed by finding the maximum number of coins we can use at the highest denomination, then the maximum number of coins at the second highest denomination, until we reach the lowest denomination. For any given $ \textit{n} $ cents, we find the maximum amount of coins of the highest denomination by using the modulus operation. 
+	
+	In order to prove that our greedy algorithm yields an optimal solution, assume that the algorithm does not yield an optimal solution. That is, there exists a better solution than what is produced by our greedy algorithm. Suppose our solution yields $\textit{g}$ as the number of coins, where: \\ 
+	$ \textit{g} $ = $ \textit{a} $ + $ \textit{b} $ + $ \textit{c} $ + $ \textit{d} $ \\
+	 $\textit{n}$ = $\textit{a}*$Quarters + $\textit{b}*$Dimes + $\textit{c}*$Nickels + $\textit{d}*$Pennies\\ \\
+	 where $\textit{a}$, $\textit{b}$, $\textit{c}$, and $\textit{d}$ are natural numbers. Then, $ \textit{Opt(n)} <  \textit{g}$ must hold for the optimal solution. In comparison to our greedy solution one or more of $\textit{a}$, $\textit{b}$, $\textit{c}$, and $\textit{d}$ in the optimal solution must be less than the values found in the greedy solution. Suppose we have smaller value for $\textit{a}$ in the optimal solution. Then, to still reach $\textit{n}$ cents, we must have at least three more lower denomination coins. Similar cases follow if we try to decrease the values of $ \textit{b} $ or $ \textit{c} $. That is, decreasing the number of higher denomination coins will only serve to increase the number of lower denomination coins by at least two. Additionally, we cannot decrease the value of $ \textit{d} $ without failing to return $ \textit{n} $ cents.  If this is the case, $ \textit{Opt(n)} <  \textit{g}$ does not hold, which is a contradiction. \\
+	 
+	(b) If the available coins are in denominations that are powers of $ \textit{c} $, we will still proceed to return change by returning the maximum number of highest denomination coins, followed by the next highest until we reach $ c^{0} $. If we consider that we only have two coins of denomination $ \textit{c} $, $ c^{0} $ and $ c^{k} $, for some $ \textit{k} $ $>$ 0, we can see that the optimal solution would consist of returning the maximum number of  the higher denomination $c^{k}$ coins, which we obtain by performing the operation $ \textit{n} $ $ \textit{mod} $ $c^{k}$, followed by returning the $ c^{0} $ coin for the remaining balance. If we did not follow this procedure and wanted a solution that was not returned by our algorithm, then we would have to use more coins. In particular, we would have to use ($c^{k}$.value)$* c^{0} $ coins, which is not optimal. We can observe the same result when considering more than the two denominations of $ \textit{c} $. That is, any other solution will result in the conversion of a higher denomination coin into more than one lower denomination coins, which yields a less than optimal solution.  \\
+	
+	To formalize the proof, assume that once again we have a solution that was produced by our algorithm that is of the form $ a_{k}c^{k}, a_{k-1}c^{k-1}, ..., a_{1}c^{1} $ and that $ \textit{g} $ = $ a_{1} $ + $ a_{2}  $ + \dots + $ a^{k} $. Assume that $ \textit{g} $ is not optimal and that $ OPT(n) $ gives us the optimal solution. Then, $ OPT(n) < $ $ g $ must hold. If  this is the case then for the optimal solution one or more of $ a_{1} $ + $ a_{2}  $ + \dots + $ a^{k} $ must be smaller. But, in order to make of  $ a^{i} $ smaller, we must use two or more lower denomination coins to achieve the same amount of change. In so doing, the value of $ OPT(n) $ exceeds that of $ g $, which is a contradiction. 
+	 
+	
+	
+	\item $ \textit{Processing Parts on Machine } $ \\ \\
+	We can solve this problem by adopting a greedy strategy. We first note that since the processing time must be done serially, the ordering of the processing times has not bearing on our final result if we did not have post-processing time. Then, we notice that the ending time for our parts really depends on the scheduling of parts based on post-processing time. The idea is to begin with the part that has the longest post-processing time so that it gets the biggest "head start" that it can. We can sort the jobs by their corresponding $ q_{i} $ values in $ O $($n log n$) time. 
+	
+	To prove that this method works, let us prove by induction. First assume that the algorithm works for the case when $ n $ = $ k $. Then, we need to show that it also works for  $ n $ = $ k $ + 1. If we look at two parts, $ J_{i} $ and $ J_{l} $ and know the processing times $ q_{i} $ $ \geq $ $ q_{l} $, then we know that $ J_{i} $ followed by $ J_{l}$ must finish before the $ J_{l} $ followed by $ J_{i}$. Let the post-processing times be $ p_{i} $ and $ q_{l}$. Then, we have: \\
+	
+	For $ J_{i} $ followed by $ J_{l}$: \\
+	$ p_{i} $  + max($q_{i}$, $ p_{l} $ + $ q_{l} $) = $ p_{i} $ + $q_{i}$ if $q_{i} > p_{l} + q_{l}$  \\
+																			$ p_{i} + p_{l} + q_{l} $ otherwise \\ 
+
+	For $ J_{l} $ followed by $ J_{i}$: \\
+		$ p_{l} $  + max($q_{l}$, $ p_{i} $ + $ q_{i} $) = $ p_{l} $ + $q_{l}$ if $q_{l} > p_{i} + q_{i}$  	\\
+																					$ p_{l} + p_{i} + q_{i} $ otherwise \\ 												
+	 Because we know that $ q_{i} $ $ \geq $ $ q_{l} $, we see that the sequence that gives us the shorter duration is indeed $ J_{i} $ followed by $ J_{l} $.																					
+																											
+																			
+	
+	
+	
+	
+	
+	
+	
+	\item $ \textit{Graph Travelling Max Profit} $  \\ 
+	
+	We can proceed to solve this problem with a dynamic programming approach. First we notice, that the naive strategy will be enumerating all the distinct possiblities of tours which would take $ n! $ time. Instead, we use the dynamic programming approach that exploits the optimal substructure seen in the problem.  \\
+	
+	OPT(n) = p(0,i) - c(0,i) - c(i,0) for all i when we do not have any elements in our subset.//
+	min for all vertices for (p(0,j) - c(0,j)  + OPT(i-j)) \\
+	
+	There are $2^{n-1}$ distinct subsets of n-1 vertices, and it take $ n $ to compute the value for all vertices, so we get $ 2^{n-1}*n^{2} $ time. 
+	
+	 
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+
+	
+	
+\end{enumerate}
+
+\end{document}          

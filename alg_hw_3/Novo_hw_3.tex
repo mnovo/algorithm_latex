@@ -1,0 +1,86 @@
+\documentclass[]{report}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{pifont}
+
+
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+
+\geometry{
+	verbose,
+	tmargin=2cm,
+	bmargin=2.5cm,
+	lmargin=3.8cm,
+	rmargin=2.5cm
+}
+
+
+
+
+% Title Page
+\title{COT 6405 Analysis of Algorithms \\ Homework 3}
+\author{Michael Novo}
+\date{October 18, 2015}
+
+
+\begin{document}
+	\maketitle
+	
+	Discussed with: Nestor Hernandez
+	
+\begin{enumerate}
+	\item $ \textit{Scheduling to minimize average completion time (16-2 CLRS)} $
+	\\
+	\\
+	a. In order to minimize the average completion time, we will sort tasks by their processing times, which we can do in $ O(n logn) $ time. In order to prove that our algorithm is correct, we look at how we compute average completion time. If we have two tasks $ a_{1} $ and $ a_{2} $, as in the question stem, we add their respective completion times $ c_{1} $ and $ c_{2} $ and divide by 2. We also realize that $ c_{2} $ is dependent upon $  p_{1} $ by the following equation: $ c_{2} $ = $ c_{1} $ + $ p_{2} $  =  $ p_{1} $ + $ p_{2} $, because the completion time of $ a_{2} $ is dependent upon the processing time of $ a_{1} $. So, in order to get the average, we are adding $ p_{1} $ twice, which is why it makes sense to first choose the task with the smallest processing time first. Suppose we had additional tasks reaching $ a_{n} $. Then, we can see that $ c_{n} $ = $ p_{1} $ + $ p_{2} $ + \dots + $ p_{n} $ and every other task before it depends on the processing time of the tasks before it. Therefore, in order to minimize average processing time, $ \frac{1}{n}\sum_{i=1}^{n}c_{i} $, we must choose the first task to have the smallest processing time because the completion time of every other  task (including itself) is dependent upon the first task's processing time. We also use this strategy for every other task following the first task. 
+	\\ 
+	\\
+	If we did not use this strategy, then we would be able to arrive at a better average completion time by  replacing the first task by one that has a shorter processing time. That is, if we assume there is an optimal solution and our greedy strategy is not optimal, then we can make a switch in our greedy solution to arrive at the optimal solution. But, upon making a switch we do not get a better solution than our greedy solution because we are multiplying a slower processing time twice rather than using the faster processing time twice. This is a contradiction, so our greedy solution must yield the optimal solution. 
+	\\
+	\\
+	b. In order to minimize average completion times when we have tasks with release times and allow preemption, we use a similar strategy to the one used in part a. That is, at any given time we choose to process the task with the shortest processing time remaining. We also use an additional data structure, priority queue, to keep a running tally of each task's remaining processing time. With each new task that enters the set of tasks available, we insert into the priority queue and begin that task if its processing time is less than the task that is currently being processed. When a task is done, it is removed from the priority queue. We can do this in $ O(n$log$n) $. 
+	\\
+	\\
+	Assume that our greedy algorithm does not minimize the average completion time. Then, there exists another algorithm that would be able to have a shorter time by switching the position of two tasks $ a_{i} $ and $ a_{k} $. Assume that at a given time, we have $ p_{i} $ $>$ $ p_{k} $. Our greedy algorithm would then place $ a_{k} $ before $ a_{i} $ since its remaining processing time is shorter. Our assumption says that we can switch the positions of $ a_{i} $ and $ a_{k} $ and get the optimal result. But, by switching the tasks, we get a longer average completion time. Initially, without switching, the average completion time is $ \dfrac{1}{2} $($ currentTime $ + 2$ p_{k} $ + $ p_{i} $). After switching, we get $ \dfrac{1}{2} $($ currentTime $ + 2$ p_{i} $ + $ p_{k} $). But, $ p_{i} $ is greater than $ p_{k} $, so the switch cannot get us an optimal result. This is a contradiction, so our greedy algorithm must be optimal. 
+	\\
+		
+	\item $ \textit{Competitive Analysis of self-orgnazing lists with move-to-front (17-5 CLRS)} $
+	\\ 
+	\\
+	a. If H does not know access sequences in advance, then we must proceed through the access sequence $ \sigma $ = $ \sigma_{1}, \sigma_{2}, ... , \sigma_{m}  $, which we can do in linear time $ O(m) $. But, for each access we make, we may proceed down the entire list of $ n $ elements for at least one of $\sigma_{i}$; thus, we get $ \Omega(mn) $ 
+	\\
+	\\
+	b. Access is $rank_{L}(x)$, but then to move $ x $ to the front of the list using transpositions we need $rank_{L}(x)$ - 1 ,which brings us to 2$*rank_{L}(x)$ - 1.
+	\\
+	\\
+	c. The cost of $ c_{i}^{*} $ should be the access time needed to get $ x $ before the list is changed to $ L_{i} $, plus the number of transpositions $ t_{i}^{*} $ done after accessing $ x $ in $ L_{i-1} $. Therefore, we obtain $ c_{i}^{*} $ = rank$_{L_{i-1}^{*}} $($ x $) + $ t_{i}^{*} $
+	\\
+	\\
+	d. $ L_{i} $ has $ q_{i} $ inversions after processing access sequence  $< \sigma_{1}, \sigma_{2}, ... , \sigma_{m}  >$ and we know that $ \Phi(L_{i}) $ = 2$ q_{i} $ and  $ \Phi(L_{i}) $ $\geq  0 $ $ \forall i $ and if we are starting with the same list $ L_{o} $, then $ \Phi(L_{o} ) $ = $0$. We can then see that a transposition will increase the potential function when the result of a transposition is an a new inversion. That is, with an additional inversion increases the potential by 2 because of $ \Phi(L_{i}) $ = 2$ q_{i} $. Additionally, we see the result of a transposition will decrease the potential function by two if it results in inverting an inversion, so that $ q_{i} $ = $ q_{i-1} - 1 $.
+	\\
+	\\
+	e. Normally, the rank$_{L-1}(x) $ would be all elements preceding $ x $ plus $ x $ itself (or 1). Then, for the partitions above, we should seek to find all elements preceding $ x $ in $ L_{i-1} $, which should be composed of the elements preceding $ x $ in $ L_{i-1} $ and in $ L_{i-1}^{*} $, or $|A|$, together with the elements that precede $ x $ in $ L_{i-1} $ and follow $ x $ in $ L_{i-1} $, or $|B|$. A similar argument holds for rank$_{L_{i-1}}^{*} $ in terms of the partitions above.
+	\\
+	\\
+	f. After we move $ x $ to the front of the list, $ x $ now  forms inversions with $ |A| $, since it is now in front of those elements. It then reduces the inversions that it had with $ |B| $ since the position of $ x $ with respect to $ |B| $ is now reversed. Additionally, there are additional inversions caused by heuristic H denoted by $ t_{i}^{*} $. Therefore, we reach the change in potential of: \\ $ \Phi(L_{i}) $ - $ \Phi(L_{i-1})$ $ \leq $2$*(|A| - |B| + t_{i}^{*})$.
+	\\
+	\\
+	g. 	$ \hat{c}_{i} $ = $ c_{i} $ + $ \Phi(L_{i}) $  - $ \Phi(L_{i-1})$, which is given. From part f we can obtain:
+	\\ $ \hat{c}_{i} $ = $ c_{i} $ + 2$*(|A| - |B| + t_{i}^{*})$. We also know $ c_{i} $ = 2$*$rank$_{L_{i-1}}$($ x $) -1. Then, \\
+	 $ \hat{c}_{i} $ = 2$*$rank$_{L_{i-1}}$($ x $) -1 + 2$*(|A| - |B| + t_{i}^{*})$. From part e we can make a substitution for $ |B| $ to obtain: \\
+	 $ \hat{c}_{i} $ = 2$*$rank$_{L_{i-1}}$($ x $) -1 + 2$*(|A| - (rank_{L_{i-1}} - |A| -1) + t_{i}^{*})$ \\
+	 $ \hat{c}_{i} $ = 4$ |A| $ + 2$  t_{i}^{*} $ + 1, and \\
+	 $ \hat{c}_{i} $ $ \leq $ 4($ |A| $ + $ |C| $ + 1) + 2$  t_{i}^{*} $ + 1, from part e \\ 
+	 $ \hat{c}_{i} $ $ \leq $ 4($ c_{i}^{*} $), because of part e and $ c_{i}^{*} $ = rank$_{L_{i-1}} $($ x $) + $ t_{i}^{*} $
+	\\
+	\\
+	h. Cost of move to front is $\sum_{i=1}^{n}$$ c_{i} $, but from above we found the amortized cost to be bounded above by 4$ c_{i}^{*} $, so then we have cost of move to front $ \leq $ 4$ C_{H} $
+	\\
+	\\
+	
+\end{enumerate}
+\end{document}          
